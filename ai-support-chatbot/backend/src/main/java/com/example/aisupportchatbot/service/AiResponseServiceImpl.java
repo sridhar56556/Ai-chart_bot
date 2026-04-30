@@ -27,36 +27,21 @@ public class AiResponseServiceImpl implements AiResponseService {
 
     @Override
     public String generateResponse(String userMessage, String sentiment, List<ChatMessage> context) {
+        System.out.println("Generating response for: " + userMessage + " (Version: Premium-Math-v2)");
+        
         // Try Gemini AI first if API Key is present
         if (geminiApiKey != null && !geminiApiKey.isEmpty()) {
             try {
                 return callGemini(SYSTEM_PROMPT + "\n\nUser: " + userMessage);
             } catch (Exception e) {
-                System.err.println("Gemini API failed, falling back to local logic: " + e.getMessage());
+                System.err.println("Gemini API failed: " + e.getMessage());
             }
         }
 
-        String msg = userMessage.toLowerCase().trim();
+        String msg = userMessage.toLowerCase().trim().replaceAll("\\s+", "");
 
-        // 0. QUICK DIRECT ANSWERS (ChatGPT Style)
-        if (msg.contains("2+3") || msg.contains("2 + 3") || msg.contains("3+2") || msg.contains("3 + 2")) return "5";
-        if (msg.contains("2+2") || msg.contains("2 + 2")) return "4";
-        if (msg.contains("5+5") || msg.contains("5 + 5")) return "10";
-
-        // 1. CONTEXTUAL CONTINUITY
-        if (!context.isEmpty()) {
-            String lastBotRes = context.get(0).getBotResponse().toLowerCase();
-            if (msg.contains("more") || msg.contains("elaborate") || msg.contains("detail") || msg.contains("why") || msg.contains("how")) {
-                if (lastBotRes.contains("hyderabad")) return getHyderabadDetails();
-                if (lastBotRes.contains("python")) return getPythonDetails();
-                if (lastBotRes.contains("java")) return getJavaDetails();
-                if (lastBotRes.contains("biryani")) return getBiryaniRecipe();
-                if (lastBotRes.contains("tokyo")) return getTokyoDetails();
-            }
-        }
-
-        // 2. MATH & CALCULATIONS
-        if (msg.matches(".*\\d+.*[\\+\\-\\*\\/].*\\d+.*")) {
+        // 1. MATH FIRST (Direct Evaluation)
+        if (msg.matches(".*\\d+[\\+\\-\\*\\/]\\d+.*")) {
             return handleMath(msg);
         }
 
