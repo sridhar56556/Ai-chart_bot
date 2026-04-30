@@ -20,10 +20,10 @@ public class AiResponseServiceImpl implements AiResponseService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     private static final String SYSTEM_PROMPT = 
-        "You are a highly capable AI assistant like ChatGPT. " +
-        "Answer ANY question directly and helpfully. Do not restrict yourself to support or pricing. " +
-        "For simple math (e.g. 3+2), give just the answer (5). For jokes, tell a natural joke. " +
-        "Be conversational, intelligent, and human-like. Never say you are a limited assistant.";
+        "You are a smart, helpful AI assistant like ChatGPT. " +
+        "Answer any question naturally and correctly. Support math, knowledge, jokes, and coding. " +
+        "For simple questions, give short direct answers. Be human-like, accurate, and helpful. " +
+        "No robotic phrases or limited bot behavior.";
 
     @Override
     public String generateResponse(String userMessage, String sentiment, List<ChatMessage> context) {
@@ -46,24 +46,26 @@ public class AiResponseServiceImpl implements AiResponseService {
         }
 
         // 2. GREETINGS
-        if (msg.matches("hi|hello|hey|heythere|hiii|gm|gn")) return "Hello! How can I help you today?";
+        if (msg.matches("hi|hello|hey|heythere|hiii|gm|gn")) return "Hello! I'm your AI assistant. How can I help you today? 😊";
 
         // 3. TIME
         if (msg.contains("time")) {
             return "The current time is " + java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")) + ".";
         }
 
-        // 4. FACTS & CITIES
-        if (msg.contains("hyderabad")) return "Hyderabad is famous for the Charminar and Biryani.";
-        if (msg.contains("delhi")) return "Delhi is the capital of India.";
-        if (msg.contains("london")) return "London is the capital of the UK.";
+        // 4. FACTS & CITIES (ChatGPT Style)
+        if (msg.contains("hyderabad")) {
+            return "Hyderabad is a major city in India known for its history, IT industry, and world-famous Biryani. It's often called the 'City of Pearls'.";
+        }
+        if (msg.contains("delhi")) return "Delhi is the capital of India, a massive metropolitan area with a rich history spanning centuries.";
+        if (msg.contains("london")) return "London is the capital of the UK, famous for its iconic landmarks like Big Ben and the Tower of London.";
         
         // 5. PROGRAMMING
-        if (msg.contains("python")) return "Python is a popular language for AI. Example: print('Hello').";
-        if (msg.contains("java")) return "Java is an object-oriented language for enterprise apps.";
+        if (msg.contains("python")) return "Python is a powerful language used for AI, web dev, and automation. Example: `print('Hello World')`";
+        if (msg.contains("java")) return "Java is a robust, object-oriented language widely used for enterprise and Android applications.";
 
         if (msg.contains("joke")) return getRandomJoke();
-        if (msg.contains("whoareyou") || msg.contains("whoareu")) return "I'm your AI assistant, ready to help with anything.";
+        if (msg.contains("whoareyou") || msg.contains("whoareu")) return "I'm your smart AI assistant, ready to help you with anything from math to general knowledge! 🚀";
 
         // 6. FALLBACK
         return smartFallback(userMessage);
@@ -134,7 +136,7 @@ public class AiResponseServiceImpl implements AiResponseService {
 
     private String getRandomJoke() {
         String[] jokes = {
-            "Why did the web developer walk out of a restaurant? Because of the table layout! 💻",
+            "Why don’t programmers like nature? Because it has too many bugs! 😄",
             "Why do Java developers wear glasses? Because they don't C#! 👓",
             "What do you call a fake noodle? An Impasta! 🍝"
         };
