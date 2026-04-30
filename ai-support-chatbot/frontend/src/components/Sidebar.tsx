@@ -34,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({ history, onNewChat }) => {
       <div className="sidebar-footer">
         <div className="user-profile">
           <div className="avatar">O</div>
-          <span>Oscar AI Assistant</span>
+          <span>AI Chat Assistant</span>
         </div>
       </div>
     </div>

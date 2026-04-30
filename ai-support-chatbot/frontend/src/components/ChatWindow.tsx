@@ -39,9 +39,16 @@ const ChatWindow: React.FC = () => {
     }
   };
 
-  const handleNewChat = () => {
-    setMessages([]);
-    setInput('');
+  const handleNewChat = async () => {
+    try {
+      await import('../services/api').then(m => m.clearChatHistory());
+      setMessages([]);
+      setInput('');
+    } catch (error) {
+      console.error('Error clearing chat history:', error);
+      // Fallback: clear local only
+      setMessages([]);
+    }
   };
 
   const formatText = (text: string) => {

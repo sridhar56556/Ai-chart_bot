@@ -59,6 +59,11 @@ public class ChatController {
         List<ChatMessage> messages = chatMessageRepository.findAllByOrderByTimestampDesc();
         return ResponseEntity.ok(messages);
     }
+    @DeleteMapping("/clear")
+    public ResponseEntity<Void> clearHistory() {
+        chatMessageRepository.deleteAll();
+        return ResponseEntity.ok().build();
+    }
 
     static class ChatRequest {
         private String message;
