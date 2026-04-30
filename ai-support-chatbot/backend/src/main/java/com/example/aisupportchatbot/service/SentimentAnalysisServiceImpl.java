@@ -1,52 +1,35 @@
 package com.example.aisupportchatbot.service;
 
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
-import edu.stanford.nlp.util.CoreMap;
-import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
-
-import java.util.Properties;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class SentimentAnalysisServiceImpl implements SentimentAnalysisService {
 
-    private StanfordCoreNLP pipeline;
+    private final List<String> positiveWords = Arrays.asList(
+        "good", "great", "excellent", "happy", "love", "awesome", "wonderful", "thanks", "thank", "nice", "perfect", "amazing", "help", "yes"
+    );
 
-    @PostConstruct
-    public void init() {
-        new Thread(() -> {
-            try {
-                System.out.println("Starting Stanford CoreNLP initialization (this may take a minute)...");
-                Properties props = new Properties();
-                props.setProperty("annotators", "tokenize, ssplit, pos, lemma, parse, sentiment");
-                this.pipeline = new StanfordCoreNLP(props);
-                System.out.println("Stanford CoreNLP initialized successfully!");
-            } catch (Exception e) {
-                System.err.println("CRITICAL: Failed to initialize Stanford CoreNLP: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }).start();
-    }
+    private final List<String> negativeWords = Arrays.asList(
+        "bad", "worst", "hate", "unhappy", "terrible", "horrible", "error", "fail", "broken", "stop", "no", "not", "busy", "wait", "slow"
+    );
 
     @Override
     public String analyzeSentiment(String text) {
-        if (text == null || text.isEmpty() || pipeline == null) {
+        if (text == null || text.isEmpty()) {
             return "neutral";
         }
 
-        Annotation annotation = pipeline.process(text);
-        for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-            String sentiment = sentence.get(SentimentCoreAnnotations.SentimentClass.class);
-            if (sentiment != null) {
-                if (sentiment.contains("Positive")) {
-                    return "positive";
-                } else if (sentiment.contains("Negative")) {
-                    return "negative";
-                }
-            }
+        String lowerText = text.toLowerCase();
+        
+        long posCount = positiveWords.stream().filter(lowerText::contains).count();
+        long negCount = negativeWords.stream().filter(lowerText::contains).count();
+
+        if (posCount > negCount) {
+            return "positive";
+        } else if (negCount > posCount) {
+            return "negative";
         }
 
         return "neutral";
