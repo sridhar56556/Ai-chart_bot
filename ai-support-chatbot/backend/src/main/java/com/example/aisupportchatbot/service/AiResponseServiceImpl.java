@@ -67,33 +67,26 @@ public class AiResponseServiceImpl implements AiResponseService {
     }
 
     private String handleMath(String msg) {
-        // Remove spaces and non-math characters
         String clean = msg.replaceAll("[^0-9\\+\\-\\*\\/\\.]", "");
-        
         try {
             if (clean.contains("+")) {
                 String[] parts = clean.split("\\+");
-                double res = Double.parseDouble(parts[0]) + Double.parseDouble(parts[1]);
-                return formatMathResult(res);
+                return formatMathResult(Double.parseDouble(parts[0]) + Double.parseDouble(parts[1]));
             }
             if (clean.contains("-")) {
                 String[] parts = clean.split("-");
-                double res = Double.parseDouble(parts[0]) - Double.parseDouble(parts[1]);
-                return formatMathResult(res);
+                return formatMathResult(Double.parseDouble(parts[0]) - Double.parseDouble(parts[1]));
             }
             if (clean.contains("*")) {
                 String[] parts = clean.split("\\*");
-                double res = Double.parseDouble(parts[0]) * Double.parseDouble(parts[1]);
-                return formatMathResult(res);
+                return formatMathResult(Double.parseDouble(parts[0]) * Double.parseDouble(parts[1]));
             }
             if (clean.contains("/")) {
                 String[] parts = clean.split("/");
-                double res = Double.parseDouble(parts[0]) / Double.parseDouble(parts[1]);
-                return formatMathResult(res);
+                return formatMathResult(Double.parseDouble(parts[0]) / Double.parseDouble(parts[1]));
             }
         } catch (Exception e) {}
-        
-        return "I'm designed to handle your math queries! For example, **4 + 3 = 7**. What else should I calculate for you? 🔢";
+        return "Please provide a valid math expression.";
     }
 
     private String formatMathResult(double res) {
@@ -102,10 +95,7 @@ public class AiResponseServiceImpl implements AiResponseService {
     }
 
     private String smartFallback(String msg) {
-        if (msg.matches("\\d+")) return "You shared a number: **" + msg + "**. Is there a specific calculation you need help with? 🔢";
-        if (msg.split(" ").length <= 2 && !msg.isEmpty()) return "You mentioned **\"" + msg + "\"**. Is there something specific you'd like to know about this? I can help with **Travel**, **Tech**, or **Math**! 🧠";
-
-        return "That's an interesting topic! I'm a **Universal AI Assistant** and I'm ready to discuss anything with you. Could you provide a bit more detail? ✨";
+        return "Tell me more about that.";
     }
 
     private String callGemini(String prompt) {
@@ -121,10 +111,7 @@ public class AiResponseServiceImpl implements AiResponseService {
         try {
             Map<String, Object> response = restTemplate.postForObject(url, body, Map.class);
             List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.get("candidates");
-            Map<String, Object> firstCandidate = candidates.get(0);
-            Map<String, Object> contentRes = (Map<String, Object>) firstCandidate.get("content");
-            List<Map<String, Object>> partsRes = (List<Map<String, Object>>) contentRes.get("parts");
-            return (String) partsRes.get(0).get("text");
+            return (String) ((List<Map<String, Object>>) ((Map<String, Object>) candidates.get(0).get("content")).get("parts")).get(0).get("text");
         } catch (Exception e) {
             throw new RuntimeException("Gemini API call failed", e);
         }
@@ -132,31 +119,30 @@ public class AiResponseServiceImpl implements AiResponseService {
 
     private String getRandomJoke() {
         String[] jokes = {
-            "**Why did the web developer walk out of a restaurant?** Because of the table layout! 💻",
-            "**Why do Java developers wear glasses?** Because they don't C#! 👓",
-            "**What do you call a fake noodle?** An Impasta! 🍝",
-            "**Why did the scarecrow win an award?** Because he was outstanding in his field! 🌾"
+            "Why did the web developer walk out of a restaurant? Because of the table layout! 💻",
+            "Why do Java developers wear glasses? Because they don't C#! 👓",
+            "What do you call a fake noodle? An Impasta! 🍝"
         };
         return jokes[random.nextInt(jokes.length)];
     }
 
     private String getHyderabadDetails() {
-        return "Beyond the basics, you should visit the **Salat Jung Museum**, take a walk in **Lumbini Park**, or shop at **Laad Bazaar**. The city's pearls are genuine and world-famous! 💎";
+        return "Hyderabad is famous for Charminar, Golconda Fort, and world-class Biryani. It's a major IT hub.";
     }
 
     private String getPythonDetails() {
-        return "Python's ecosystem is massive. Libraries like **Pandas** for data, **Django** for web, and **TensorFlow** for AI make it incredibly versatile. It's often the first language people learn! 🐍";
+        return "Python is a versatile language used for AI, Data Science, and Web Development.";
     }
 
     private String getJavaDetails() {
-        return "Java's strong typing and JVM (Java Virtual Machine) make it highly stable for large-scale applications. It's the backbone of many banking systems and big-data tools like **Hadoop**. ☕";
+        return "Java is a robust, object-oriented language used for enterprise applications and Android.";
     }
 
     private String getBiryaniRecipe() {
-        return "To make a proper Biryani, you need to layer semi-cooked rice over marinated meat, seal the pot with dough, and cook on a very low flame. This **'Dum'** method traps the steam and infuses every grain with flavor! 👨‍🍳";
+        return "Biryani is made by layering partially cooked rice over marinated meat and slow-cooking (Dum).";
     }
 
     private String getTokyoDetails() {
-        return "In Tokyo, don't miss the **Tsukiji Outer Market** for the freshest seafood, and check out **Akihabara** if you're into electronics and anime. The public transport system is a marvel of efficiency! 🚄";
+        return "Tokyo is a metropolis known for mixing traditional culture with high-tech skyscrapers.";
     }
 }
