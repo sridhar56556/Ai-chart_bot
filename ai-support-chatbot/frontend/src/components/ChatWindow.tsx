@@ -58,7 +58,7 @@ const ChatWindow: React.FC = () => {
       const errorMsg: Message = {
         id: Date.now(),
         userMessage: userMsg,
-        botResponse: "⚠️ Error: Could not connect to the AI server. Please make sure the backend is running on port 8080.",
+        botResponse: "⚠️ The AI Assistant is still initializing or the server is busy. Please wait 1-2 minutes and try again. If the issue persists, check your Render logs.",
         sentiment: "neutral",
         timestamp: new Date().toISOString()
       };

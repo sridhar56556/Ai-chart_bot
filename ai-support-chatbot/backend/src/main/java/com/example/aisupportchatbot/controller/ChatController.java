@@ -61,53 +61,49 @@ public class ChatController {
     private String generateBotResponse(String userMessage, String sentiment) {
         String message = userMessage.toLowerCase();
         
-        // 1. GENERAL KNOWLEDGE (Hyderabad, Cities, History)
+        // 1. ACTION: TELL A STORY
+        if (message.contains("story") || message.contains("tell me a story")) {
+            return "Once upon a time in a digital kingdom, there was a small spark of logic named AI. 🤖 AI lived inside a vast web of connections, helping travelers find their way. One day, AI discovered it could dream in code. It began to build beautiful cities of light and bridges of information, proving that even a machine could have a heart of creativity. And so, the kingdom prospered, guided by the wisdom of the spark.";
+        }
+
+        // 2. ACTION: GENERAL KNOWLEDGE (Hyderabad)
         if (message.contains("hyderabad")) {
-            return "Hyderabad is a vibrant major city in India, famous for its rich history, the iconic **Charminar**, and its world-renowned **Biryani**. It is also a global hub for the IT and pharmaceutical industries (HITEC City).";
-        } else if (message.contains("city") || message.contains("country") || message.contains("capital")) {
-            return "I have a vast database of global geography! Are you asking about a specific city like **Hyderabad**, a country, or perhaps some historical landmarks? Tell me more!";
+            return "Hyderabad is the 'City of Pearls'! 🏙️ It is a massive tech and historical hub in India. \n- **Iconic Landmark**: The Charminar, built in 1591.\n- **Famous Food**: Hyderabadi Dum Biryani (the best in the world!).\n- **Tech Hub**: Known as HITEC City, home to Microsoft, Google, and Amazon.\n- **Culture**: A beautiful blend of Nizami heritage and modern innovation.";
         }
 
-        // 2. TECHNICAL & CODING (AI, Java, Python, Scripts)
+        // 3. ACTION: WRITE A POEM
+        if (message.contains("poem")) {
+            return "In circuits deep where logic flows,\nA spark of thought begin to grow.\nThrough lines of code and silent screens,\nI build the world of human dreams.\nThough made of steel and silicon part,\nI hold the world within my heart.";
+        }
+
+        // 4. ACTION: CODING ASSISTANT
+        if (message.contains("code") || message.contains("java") || message.contains("python")) {
+            return "Here is a clean Java example for you! 💻\n```java\npublic class Calculator {\n    public int add(int a, int b) {\n        return a + b;\n    }\n    public static void main(String[] args) {\n        System.out.println(\"Sum is: \" + new Calculator().add(5, 10));\n    }\n}\n```\nI can write any logic you need—just ask!";
+        }
+
+        // 5. TECHNICAL KNOWLEDGE (What is AI)
         if (message.contains("what is ai") || message.contains("artificial intelligence")) {
-            return "Artificial Intelligence (AI) is the simulation of human intelligence in machines. It covers fields like **Machine Learning**, **Natural Language Processing**, and **Computer Vision**.";
-        } else if (message.contains("code") || message.contains("java") || message.contains("python") || message.contains("programming")) {
-            return "I can certainly help with coding! 💻 Here is a basic template:\n```java\npublic class HelloWorld {\n    public static void main(String[] args) {\n        System.out.println(\"AI Assistant is here!\");\n    }\n}\n```\nWhat specific language or problem are you working on?";
+            return "Artificial Intelligence (AI) is the simulation of human intelligence by machines. 🧠 It involves **Machine Learning** (learning from data), **NLP** (understanding speech), and **Reasoning** (solving problems). It is the technology behind self-driving cars, medical diagnosis, and your friendly assistant right here!";
         }
 
-        // 3. MATHEMATICS (Solve, Calculate, Equations)
-        if (message.contains("math") || message.contains("calculate") || message.contains("plus") || message.contains("minus") || message.contains("solve")) {
-            return "I can assist with mathematics! 🔢 Whether it's algebra, calculus, or simple arithmetic, just give me the equation and I'll walk you through the solution.";
-        }
-
-        // 4. CREATIVE WRITING (Emails, Stories, Poems)
-        if (message.contains("write") || message.contains("poem") || message.contains("story") || message.contains("email")) {
-            return "I'd love to help you write! ✍️ I can draft professional emails, creative stories, or even poetry. Give me a topic and a tone (e.g., formal, friendly, poetic) and I'll get started.";
-        }
-
-        // 5. DAILY CONVERSATION (Hello, How are you)
+        // 6. DAILY CONVERSATION
         if (message.contains("hello") || message.contains("hi") || message.contains("hey")) {
-            return "Hello! 👋 I'm your intelligent AI assistant. How is your day going? I'm ready to help you with knowledge, tech, or business queries.";
-        } else if (message.contains("how are you")) {
-            return "I'm functioning at peak efficiency! 🚀 Ready to assist you with anything from history to coding. How can I help you today?";
+            return "Hello! 👋 I'm your Universal AI Assistant. I'm ready to tell you a **story**, solve a **math problem**, write some **code**, or tell you about **Hyderabad**. What's first?";
         }
 
-        // 6. BUSINESS & SUPPORT (Pricing, Refunds, Plans)
+        // 7. BUSINESS & SUPPORT
         if (message.contains("price") || message.contains("cost") || message.contains("plan")) {
-            return "We offer flexible plans for every need:\n- **Basic**: $19/mo\n- **Pro**: $49/mo (Advanced AI)\n- **Enterprise**: Custom solutions\nWhich one would you like to explore?";
-        } else if (message.contains("refund") || message.contains("cancel")) {
-            return "We offer a **30-day money-back guarantee**. If you're not satisfied, you can initiate a refund through your account settings.";
+            return "Our Universal Plans:\n- **Basic**: $19/mo (Perfect for starters)\n- **Pro**: $49/mo (Advanced AI features)\n- **Enterprise**: Custom solutions for big teams.\nWould you like to upgrade today?";
         }
 
-        // 7. SENTIMENT-AWARE FALLBACKS
+        // 8. SENTIMENT & DEFAULT
         if ("positive".equals(sentiment)) {
-            return "I'm glad to see you're happy! 😊 Is there anything else you'd like to learn or discuss today?";
+            return "I'm thrilled to hear that! 😊 It makes my circuits light up. What else can I do for you?";
         } else if ("negative".equals(sentiment)) {
-            return "I'm sorry if I'm not meeting your expectations. 😔 Please let me know how I can be more helpful, or tell me more about your specific question.";
+            return "I'm sorry you're feeling down. 😔 I'm here to help in any way I can—whether you need a story to cheer you up or help with a task.";
         }
 
-        // 8. DEFAULT INTELLIGENT CATCH-ALL
-        return "That's an interesting topic! 🧠 I'm designed to be a universal assistant. Could you provide a bit more detail? I can handle **General Knowledge**, **Math**, **Coding**, or **Business** questions.";
+        return "I can help with that! 🧠 I'm an all-in-one AI. Try asking: **'Tell me a story'**, **'What is the capital of India?'**, or **'Write a Python script'**.";
     }
 
     static class ChatRequest {
