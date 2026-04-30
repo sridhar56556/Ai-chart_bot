@@ -82,11 +82,38 @@ public class AiResponseServiceImpl implements AiResponseService {
     }
 
     private String handleMath(String msg) {
-        // Direct answer logic for math
-        if (msg.contains("3") && msg.contains("2") && msg.contains("+")) return "5";
-        if (msg.contains("5") && msg.contains("4") && msg.contains("+")) return "9";
+        // Remove spaces and non-math characters
+        String clean = msg.replaceAll("[^0-9\\+\\-\\*\\/\\.]", "");
         
-        return "That sounds like a math problem! I'm currently optimized for basic arithmetic like **5 + 4 = 9**. What else can I calculate? 🔢";
+        try {
+            if (clean.contains("+")) {
+                String[] parts = clean.split("\\+");
+                double res = Double.parseDouble(parts[0]) + Double.parseDouble(parts[1]);
+                return formatMathResult(res);
+            }
+            if (clean.contains("-")) {
+                String[] parts = clean.split("-");
+                double res = Double.parseDouble(parts[0]) - Double.parseDouble(parts[1]);
+                return formatMathResult(res);
+            }
+            if (clean.contains("*")) {
+                String[] parts = clean.split("\\*");
+                double res = Double.parseDouble(parts[0]) * Double.parseDouble(parts[1]);
+                return formatMathResult(res);
+            }
+            if (clean.contains("/")) {
+                String[] parts = clean.split("/");
+                double res = Double.parseDouble(parts[0]) / Double.parseDouble(parts[1]);
+                return formatMathResult(res);
+            }
+        } catch (Exception e) {}
+        
+        return "I'm designed to handle your math queries! For example, **4 + 3 = 7**. What else should I calculate for you? 🔢";
+    }
+
+    private String formatMathResult(double res) {
+        if (res == (long) res) return String.format("%d", (long) res);
+        return String.format("%.2f", res);
     }
 
     private String smartFallback(String msg) {
