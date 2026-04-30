@@ -1,21 +1,23 @@
-# Stage 1: Build
-FROM maven:3.8.5-eclipse-temurin-17 AS build
+# Stage 1: Build Frontend
+FROM node:18-alpine AS frontend-build
 WORKDIR /app
+COPY frontend/package*.json ./frontend/
+RUN cd frontend && npm install
+COPY frontend/ ./frontend/
+RUN cd frontend && npm run build
 
-# Copy the pom.xml and source code (already inside the backend folder)
-COPY pom.xml .
-COPY src ./src
-
-# Build the JAR
+# Stage 2: Build Backend
+FROM maven:3.8.5-eclipse-temurin-17 AS backend-build
+WORKDIR /app
+COPY backend/pom.xml .
+COPY backend/src ./src
+# Copy frontend build to static resources
+COPY --from=frontend-build /app/frontend/dist ./src/main/resources/static
 RUN mvn clean package -DskipTests
 
-# Stage 2: Run
+# Stage 3: Run
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
-
-# Expose the port
+COPY --from=backend-build /app/target/*.jar app.jar
 EXPOSE 8080
-
-# Command to run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
