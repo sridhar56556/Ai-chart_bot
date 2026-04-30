@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM maven:3.8.4-openjdk-17-slim AS build
+FROM maven:3.8.5-eclipse-temurin-17 AS build
 WORKDIR /app
 
 # Copy the entire backend folder
@@ -10,7 +10,7 @@ COPY ai-support-chatbot/backend/src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Run
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
