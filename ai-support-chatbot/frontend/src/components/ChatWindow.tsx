@@ -139,9 +139,6 @@ const ChatWindow: React.FC = () => {
                           <div className="message-bubble">
                             {formatText(msg.botResponse)}
                           </div>
-                          <span className="sentiment-badge">
-                            {msg.sentiment.toLowerCase()}
-                          </span>
                         </div>
                       </div>
                     </motion.div>

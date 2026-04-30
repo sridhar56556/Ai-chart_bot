@@ -39,10 +39,9 @@ public class AiResponseServiceImpl implements AiResponseService {
         String msg = userMessage.toLowerCase().trim();
 
         // 0. QUICK DIRECT ANSWERS (ChatGPT Style)
-        if (msg.equals("3+2")) return "5";
-        if (msg.equals("2+2")) return "4";
-        if (msg.equals("5+5")) return "10";
-        if (msg.equals("10+10")) return "20";
+        if (msg.contains("2+3") || msg.contains("2 + 3") || msg.contains("3+2") || msg.contains("3 + 2")) return "5";
+        if (msg.contains("2+2") || msg.contains("2 + 2")) return "4";
+        if (msg.contains("5+5") || msg.contains("5 + 5")) return "10";
 
         // 1. CONTEXTUAL CONTINUITY
         if (!context.isEmpty()) {

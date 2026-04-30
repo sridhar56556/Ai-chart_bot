@@ -22,5 +22,5 @@ WORKDIR /app
 COPY --from=backend-build /app/ai-support-chatbot/backend/target/*.jar app.jar
 
 EXPOSE 8080
-# Command to run the application with memory optimization for Stanford CoreNLP
-ENTRYPOINT ["java", "-Xmx1024m", "-jar", "app.jar"]
+# Optimized for Render Free Tier (512MB RAM)
+ENTRYPOINT ["java", "-Xmx384m", "-jar", "app.jar"]
