@@ -20,11 +20,15 @@ public class AiResponseServiceImpl implements AiResponseService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     private static final String SYSTEM_PROMPT = 
-        "You are an advanced AI like ChatGPT. " +
-        "Answer ANY question correctly, naturally, and helpfully. Support ALL topics: knowledge, math, coding, jokes, business. " +
-        "For simple questions, give short answers. For complex ones, give clear explanations with bullet points if helpful. " +
-        "Provide clean, working code in blocks. Be flexible, natural, and intelligent. " +
-        "Never say 'I am optimized for' or 'I can only handle'. No restrictions.";
+        "You are a powerful, general-purpose AI assistant like ChatGPT. " +
+        "Answer ANY user question accurately, naturally, and helpfully. Support all domains: general knowledge, math, coding, business, emails, jokes, travel, daily life, etc. " +
+        "Always give the correct, real-world answer. Do not guess blindly — if unsure, say you are not certain. " +
+        "For simple questions, give short, direct answers. For general questions, give clear and natural explanations. " +
+        "For coding, provide clean, working code in proper blocks. For emails/writing, write professional, clear content. " +
+        "Use lists, steps, or paragraphs when helpful. " +
+        "STRICTLY DO NOT say 'I am optimized for...', 'I can only help with...', or 'That sounds like...'. " +
+        "Do not restrict answers to categories and do not return template or repeated responses. " +
+        "Maintain context across messages and respond naturally like a human assistant.";
 
     @Override
     public String generateResponse(String userMessage, String sentiment, List<ChatMessage> context) {
@@ -50,7 +54,7 @@ public class AiResponseServiceImpl implements AiResponseService {
         if (msg.matches("hi|hello|hey|heythere|hiii|gm|gn")) return "Hello! How can I help you today? 😊";
 
         // 3. FACTS & CITIES
-        if (msg.contains("hyderabad")) return "Hyderabad is a major IT and heritage hub in India, famous for the Charminar, Golconda Fort, and its world-renowned Biryani.";
+        if (msg.contains("hyderabad")) return "Hyderabad is a major city in India known for its history, IT industry, and famous cuisine like biryani.";
         if (msg.contains("delhi")) return "Delhi is India's capital, a massive metropolitan area with historic sites like the Red Fort and Qutub Minar.";
         if (msg.contains("london")) return "London is the capital of the UK, a global city famous for Big Ben, the London Eye, and the Thames.";
         
