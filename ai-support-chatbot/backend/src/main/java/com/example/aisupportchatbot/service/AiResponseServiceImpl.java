@@ -1,5 +1,6 @@
 package com.example.aisupportchatbot.service;
-// Triggering fresh deploy to Render
+// Finalizing premium UI and smart AI logic
+// Triggering redeploy
 
 import com.example.aisupportchatbot.model.ChatMessage;
 import org.springframework.stereotype.Service;
