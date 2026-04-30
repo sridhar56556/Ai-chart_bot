@@ -48,22 +48,24 @@ public class AiResponseServiceImpl implements AiResponseService {
         // 2. GREETINGS
         if (msg.matches("hi|hello|hey|heythere|hiii|gm|gn")) return "Hello! How can I help you today?";
 
-        // 3. FACTS & CITIES
-        if (msg.contains("hyderabad")) return "Hyderabad is famous for the Charminar and world-class Biryani.";
-        if (msg.contains("delhi")) return "Delhi is the capital of India, known for the Red Fort and India Gate.";
-        if (msg.contains("london")) return "London is the capital of the UK, famous for Big Ben and Buckingham Palace.";
-        if (msg.contains("newyork")) return "New York is known for the Statue of Liberty and Times Square.";
+        // 3. TIME
+        if (msg.contains("time")) {
+            return "The current time is " + java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")) + ".";
+        }
 
-        // 4. PROGRAMMING
-        if (msg.contains("python")) return "Python is great for AI and data science. Use 'print()' to output text.";
-        if (msg.contains("java")) return "Java is a powerful object-oriented language used for enterprise apps.";
-        if (msg.contains("html")) return "HTML (HyperText Markup Language) is the skeleton of every website.";
-        if (msg.contains("javascript") || msg.contains("js")) return "JavaScript is the logic of the web, making pages interactive.";
+        // 4. FACTS & CITIES
+        if (msg.contains("hyderabad")) return "Hyderabad is famous for the Charminar and Biryani.";
+        if (msg.contains("delhi")) return "Delhi is the capital of India.";
+        if (msg.contains("london")) return "London is the capital of the UK.";
+        
+        // 5. PROGRAMMING
+        if (msg.contains("python")) return "Python is a popular language for AI. Example: print('Hello').";
+        if (msg.contains("java")) return "Java is an object-oriented language for enterprise apps.";
 
         if (msg.contains("joke")) return getRandomJoke();
-        if (msg.contains("whoareyou")) return "I'm your AI assistant, ready to help with any question.";
+        if (msg.contains("whoareyou") || msg.contains("whoareu")) return "I'm your AI assistant, ready to help with anything.";
 
-        // 5. FALLBACK
+        // 6. FALLBACK
         return smartFallback(userMessage);
     }
 

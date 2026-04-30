@@ -1,5 +1,6 @@
 # Stage 1: Build Frontend
 FROM node:18-alpine AS frontend-build
+ENV BUILD_ID=2026-04-30-19:40:00
 WORKDIR /app/frontend
 COPY ai-support-chatbot/frontend/package*.json ./
 RUN npm install
