@@ -110,39 +110,43 @@ const ChatWindow: React.FC = () => {
             
             <AnimatePresence>
               {messages.map((msg) => (
-                <div key={msg.id} className="message-wrapper">
-                  {/* User Message */}
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="user"
-                  >
-                    <div className="message-bubble">
-                      {msg.userMessage}
-                    </div>
-                  </motion.div>
-
-                  {/* Bot Response */}
-                  <motion.div 
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.1 }}
-                    className="bot"
-                  >
-                    <div className="bot-content">
-                      <div className="avatar" style={{ width: '32px', height: '32px', fontSize: '0.85rem', background: 'linear-gradient(135deg, #2563eb, #7c3aed)', borderRadius: '10px', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)' }}>AI</div>
-                      <div className="bot-response-text">
-                        <div className="message-bubble">
-                          {formatText(msg.botResponse)}
-                        </div>
-                        <span className="sentiment-badge">
-                          {msg.sentiment.toLowerCase()}
-                        </span>
+                <React.Fragment key={msg.id}>
+                  {/* User Message (Right) */}
+                  <div className="message-wrapper user-wrapper">
+                    <motion.div 
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="user-message"
+                    >
+                      <div className="message-bubble">
+                        {msg.userMessage}
                       </div>
-                    </div>
-                  </motion.div>
-                </div>
+                    </motion.div>
+                  </div>
+
+                  {/* Bot Message (Left) */}
+                  <div className="message-wrapper bot-wrapper">
+                    <motion.div 
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.4, delay: 0.1 }}
+                      className="bot-message"
+                    >
+                      <div className="bot-content">
+                        <div className="avatar" style={{ width: '32px', height: '32px', fontSize: '0.85rem', background: 'linear-gradient(135deg, #2563eb, #7c3aed)', borderRadius: '10px' }}>AI</div>
+                        <div className="bot-response-text">
+                          <div className="message-bubble">
+                            {formatText(msg.botResponse)}
+                          </div>
+                          <span className="sentiment-badge">
+                            {msg.sentiment.toLowerCase()}
+                          </span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </div>
+                </React.Fragment>
               ))}
             </AnimatePresence>
             
