@@ -72,21 +72,21 @@ const ChatWindow: React.FC = () => {
       <header className="chat-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div className="glass" style={{ padding: '10px', borderRadius: '12px', background: 'var(--primary)' }}>
-            <Bot size={24} color="white" />
+            <Sparkles size={24} color="white" />
           </div>
           <div>
-            <h1>AI Support Bot</h1>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Always online • Powered by ML</p>
+            <h1>Universal AI Assistant</h1>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>24/7 Inteligent Agent • Powered by Advanced ML</p>
           </div>
         </div>
-        <Sparkles size={20} color="var(--primary)" />
+        <Bot size={20} color="var(--primary)" />
       </header>
 
       <div className="chat-messages">
         {messages.length === 0 && !isLoading && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.5 }}>
-            <MessageSquare size={48} style={{ marginBottom: '16px' }} />
-            <p>Start a conversation to see AI sentiment analysis in action.</p>
+            <Sparkles size={48} style={{ marginBottom: '16px' }} />
+            <p>Ready to help with Code, Writing, Math, and more.</p>
           </div>
         )}
         
@@ -151,7 +151,7 @@ const ChatWindow: React.FC = () => {
       </div>
 
       <div className="quick-actions" style={{ padding: '0 20px', marginBottom: '10px', display: 'flex', gap: '8px', overflowX: 'auto' }}>
-        {['Pricing', 'Order Status', 'Refund Policy', 'Tech Support'].map(action => (
+        {['Coding Helper', 'Creative Writing', 'Solve Math', 'Translate', 'Pricing', 'Tech Support'].map(action => (
           <button 
             key={action}
             onClick={() => { setInput(action); }}
