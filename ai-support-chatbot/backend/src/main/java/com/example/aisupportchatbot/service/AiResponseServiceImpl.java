@@ -1,5 +1,5 @@
 package com.example.aisupportchatbot.service;
-// Final UI Polishing complete
+// Final Extreme Directness Engine v1
 
 import com.example.aisupportchatbot.model.ChatMessage;
 import org.springframework.beans.factory.annotation.Value;
