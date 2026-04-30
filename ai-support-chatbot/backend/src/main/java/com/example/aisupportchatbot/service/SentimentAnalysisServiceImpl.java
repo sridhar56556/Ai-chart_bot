@@ -21,7 +21,7 @@ public class SentimentAnalysisServiceImpl implements SentimentAnalysisService {
             try {
                 System.out.println("Starting Stanford CoreNLP initialization (this may take a minute)...");
                 Properties props = new Properties();
-                props.setProperty("annotators", "tokenize, ssplit, pos, lemma, sentiment");
+                props.setProperty("annotators", "tokenize, ssplit, pos, lemma, parse, sentiment");
                 this.pipeline = new StanfordCoreNLP(props);
                 System.out.println("Stanford CoreNLP initialized successfully!");
             } catch (Exception e) {
