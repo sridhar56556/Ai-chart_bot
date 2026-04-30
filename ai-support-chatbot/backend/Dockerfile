@@ -2,9 +2,9 @@
 FROM maven:3.8.5-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copy the entire backend folder
-COPY ai-support-chatbot/backend/pom.xml .
-COPY ai-support-chatbot/backend/src ./src
+# Copy the pom.xml and source code (already inside the backend folder)
+COPY pom.xml .
+COPY src ./src
 
 # Build the JAR
 RUN mvn clean package -DskipTests
