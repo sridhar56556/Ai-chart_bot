@@ -61,37 +61,45 @@ public class ChatController {
     private String generateBotResponse(String userMessage, String sentiment) {
         String message = userMessage.toLowerCase();
         
-        // 1. UNIVERSAL KNOWLEDGE & TOOLS
-        if (message.contains("code") || message.contains("java") || message.contains("python") || message.contains("script")) {
-            return "I can certainly help with coding! 💻 Here is a basic template:\n```java\npublic class HelloWorld {\n    public static void main(String[] args) {\n        System.out.println(\"AI Assistant is here!\");\n    }\n}\n```\nWhat specific language or problem are you working on?";
-        } else if (message.contains("math") || message.contains("calculate") || message.contains("plus") || message.contains("minus")) {
-            return "I can assist with mathematics! 🔢 Whether it's algebra, calculus, or simple arithmetic, just give me the equation and I'll walk you through the solution.";
-        } else if (message.contains("write") || message.contains("poem") || message.contains("story") || message.contains("email")) {
-            return "I'd love to help you write! ✍️ I can draft professional emails, creative stories, or even poetry. Give me a topic and a tone (e.g., formal, friendly, poetic) and I'll get started.";
-        } else if (message.contains("translate") || message.contains("language") || message.contains("spanish") || message.contains("french")) {
-            return "I am multilingual! 🌍 I can translate phrases and help you learn new languages. What would you like to translate today?";
+        // 1. GENERAL KNOWLEDGE (Cities, History, Facts)
+        if (message.contains("hyderabad")) {
+            return "Hyderabad is a vibrant major city in India, famous for its rich history, the iconic **Charminar**, and its world-renowned **Biryani**. It is also a global hub for the IT and pharmaceutical industries (HITEC City).";
+        } else if (message.contains("city") || message.contains("country") || message.contains("capital")) {
+            return "I have a vast database of global geography! Are you asking about a specific city like **Hyderabad**, a country, or perhaps some historical landmarks? Tell me more!";
         }
 
-        // 2. GENERAL ASSISTANCE
-        if (message.contains("who are you") || message.contains("what can you do")) {
-            return "I am your Universal AI Assistant. 🤖 I can help you with:\n- **Writing & Content**\n- **Coding & Technical Support**\n- **Math & Science**\n- **Business & Pricing Queries**\n- **Sentiment Analysis**\nHow can I help you excel today?";
+        // 2. TECHNICAL & EDUCATIONAL
+        if (message.contains("what is ai") || message.contains("artificial intelligence")) {
+            return "Artificial Intelligence (AI) is the simulation of human intelligence in machines that are programmed to think and learn like humans. It covers fields like **Machine Learning**, **Natural Language Processing**, and **Computer Vision**.";
+        } else if (message.contains("code") || message.contains("java") || message.contains("python") || message.contains("programming")) {
+            return "I can help you with programming! 💻 I can explain concepts, debug code, or provide templates. What specific language are you working with?";
         }
 
-        // 3. LEGACY SUPPORT KNOWLEDGE
-        if (message.contains("help") || message.contains("support")) {
-            return "I'm here to support you! 🛡️ Whether it's technical issues, order tracking, or billing, I've got you covered. What's the problem?";
-        } else if (message.contains("price") || message.contains("cost") || message.contains("plan")) {
-            return "Our Universal Plans:\n- **Free**: $0/mo (Standard AI)\n- **Pro**: $20/mo (Faster AI + Priority)\n- **Enterprise**: Custom solutions\nWhich one fits your needs?";
+        // 3. DAILY CONVERSATION
+        if (message.contains("hello") || message.contains("hi") || message.contains("hey")) {
+            return "Hello! 👋 I'm your intelligent AI assistant. How is your day going? I'm ready to help you with knowledge, tech, or business queries.";
+        } else if (message.contains("how are you")) {
+            return "I'm functioning at peak efficiency! 🚀 Ready to assist you with anything from history to coding. How can I help you today?";
         }
 
-        // 4. SENTIMENT-AWARE RESPONSES
+        // 4. BUSINESS & SUPPORT (Pricing, Refunds, Orders)
+        if (message.contains("price") || message.contains("cost") || message.contains("plan")) {
+            return "We offer flexible plans for every need:\n- **Basic**: $19/mo\n- **Pro**: $49/mo (Advanced AI)\n- **Enterprise**: Custom solutions\nWhich one would you like to explore?";
+        } else if (message.contains("refund") || message.contains("cancel")) {
+            return "We offer a **30-day money-back guarantee**. If you're not satisfied, you can initiate a refund through your account settings or contact our billing team.";
+        } else if (message.contains("support") || message.contains("help")) {
+            return "I'm here to support you! 🛡️ Whether it's a technical error or a billing question, just describe the issue and I'll find a solution.";
+        }
+
+        // 5. SENTIMENT-AWARE FALLBACKS
         if ("positive".equals(sentiment)) {
-            return "I love the positive energy! 🌟 It's a pleasure helping someone so enthusiastic. Anything else on your mind?";
+            return "I'm glad to see you're happy! 😊 Is there anything else you'd like to learn or discuss today?";
         } else if ("negative".equals(sentiment)) {
-            return "I'm sorry things are tough right now. 😔 I'm here to listen and help in any way I can. Let's work through it together.";
+            return "I'm sorry if I'm not meeting your expectations. 😔 Please let me know how I can be more helpful, or tell me more about your specific question.";
         }
 
-        return "I'm your versatile AI Assistant! 🧠 I'm not quite sure how to handle that specific request yet, but you can ask me to **write a story**, **fix code**, or **solve math problems**. Try one!";
+        // 6. DEFAULT INTELLIGENT CATCH-ALL
+        return "That's an interesting topic! 🧠 I'm designed to be a universal assistant. Could you provide a bit more detail so I can give you the most accurate answer? I can handle **General Knowledge**, **Tech**, or **Business** questions.";
     }
 
     static class ChatRequest {
