@@ -39,7 +39,9 @@ public class AiResponseServiceImpl implements AiResponseService {
         String msg = userMessage.toLowerCase().trim().replaceAll("\\s+", "");
 
         // 1. MATH FIRST (Direct Answer)
-        if (msg.matches(".*\\d+[\\+\\-\\*\\/]\\d+.*")) {
+        if (msg.matches(".*\\d+[\\+\\-\\*\\/]\\d+.*") || 
+            msg.contains("plus") || msg.contains("minus") || 
+            msg.contains("multipliedby") || msg.contains("dividedby")) {
             return handleMath(msg);
         }
 
@@ -56,7 +58,18 @@ public class AiResponseServiceImpl implements AiResponseService {
     }
 
     private String handleMath(String msg) {
-        String clean = msg.replaceAll("[^0-9\\+\\-\\*\\/\\.]", "");
+        // Convert words to symbols
+        String normalized = msg.toLowerCase()
+            .replace("plus", "+")
+            .replace("minus", "-")
+            .replace("multipliedby", "*")
+            .replace("times", "*")
+            .replace("into", "*")
+            .replace("dividedby", "/")
+            .replaceAll("\\s+", "");
+            
+        String clean = normalized.replaceAll("[^0-9\\+\\-\\*\\/\\.]", "");
+        
         try {
             if (clean.contains("+")) {
                 String[] parts = clean.split("\\+");
@@ -75,7 +88,8 @@ public class AiResponseServiceImpl implements AiResponseService {
                 return formatMathResult(Double.parseDouble(parts[0]) / Double.parseDouble(parts[1]));
             }
         } catch (Exception e) {}
-        return "Please provide a valid math expression.";
+        
+        return "I can help with that! If you're asking a math question, please use numbers like '5 + 2'.";
     }
 
     private String formatMathResult(double res) {
@@ -84,7 +98,7 @@ public class AiResponseServiceImpl implements AiResponseService {
     }
 
     private String smartFallback(String msg) {
-        return "Tell me more about that.";
+        return "I'm here to help. Could you provide a bit more detail so I can give you the most accurate answer?";
     }
 
     private String callGemini(String prompt) {
@@ -102,7 +116,7 @@ public class AiResponseServiceImpl implements AiResponseService {
             List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.get("candidates");
             return (String) ((List<Map<String, Object>>) ((Map<String, Object>) candidates.get(0).get("content")).get("parts")).get(0).get("text");
         } catch (Exception e) {
-            throw new RuntimeException("Gemini API call failed", e);
+            throw new RuntimeException("Gemini API failed", e);
         }
     }
 
@@ -116,22 +130,6 @@ public class AiResponseServiceImpl implements AiResponseService {
     }
 
     private String getHyderabadDetails() {
-        return "Hyderabad is famous for Charminar, Golconda Fort, and world-class Biryani. It's a major IT hub.";
-    }
-
-    private String getPythonDetails() {
-        return "Python is a versatile language used for AI, Data Science, and Web Development.";
-    }
-
-    private String getJavaDetails() {
-        return "Java is a robust, object-oriented language used for enterprise applications and Android.";
-    }
-
-    private String getBiryaniRecipe() {
-        return "Biryani is made by layering partially cooked rice over marinated meat and slow-cooking (Dum).";
-    }
-
-    private String getTokyoDetails() {
-        return "Tokyo is a metropolis known for mixing traditional culture with high-tech skyscrapers.";
+        return "Hyderabad is famous for its rich history, the Charminar, and world-class Biryani.";
     }
 }
