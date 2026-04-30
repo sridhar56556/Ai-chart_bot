@@ -20,14 +20,15 @@ public class AiResponseServiceImpl implements AiResponseService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     private static final String SYSTEM_PROMPT = 
-        "You are a smart, helpful AI assistant like ChatGPT. " +
-        "Answer any question naturally and correctly. Support math, knowledge, jokes, and coding. " +
-        "For simple questions, give short direct answers. Be human-like, accurate, and helpful. " +
-        "No robotic phrases or limited bot behavior.";
+        "You are an advanced AI like ChatGPT. " +
+        "Answer ANY question correctly, naturally, and helpfully. Support ALL topics: knowledge, math, coding, jokes, business. " +
+        "For simple questions, give short answers. For complex ones, give clear explanations with bullet points if helpful. " +
+        "Provide clean, working code in blocks. Be flexible, natural, and intelligent. " +
+        "Never say 'I am optimized for' or 'I can only handle'. No restrictions.";
 
     @Override
     public String generateResponse(String userMessage, String sentiment, List<ChatMessage> context) {
-        // Try Gemini AI first if API Key is present
+        // Try Gemini AI first for full intelligence
         if (geminiApiKey != null && !geminiApiKey.isEmpty()) {
             try {
                 return callGemini(SYSTEM_PROMPT + "\n\nUser: " + userMessage);
@@ -38,7 +39,7 @@ public class AiResponseServiceImpl implements AiResponseService {
 
         String msg = userMessage.toLowerCase().trim().replaceAll("\\s+", "");
 
-        // 1. MATH FIRST (Direct Answer)
+        // 1. MATH (Direct Result)
         if (msg.matches(".*\\d+[\\+\\-\\*\\/]\\d+.*") || 
             msg.contains("plus") || msg.contains("minus") || 
             msg.contains("multipliedby") || msg.contains("dividedby")) {
@@ -46,28 +47,22 @@ public class AiResponseServiceImpl implements AiResponseService {
         }
 
         // 2. GREETINGS
-        if (msg.matches("hi|hello|hey|heythere|hiii|gm|gn")) return "Hello! I'm your AI assistant. How can I help you today? 😊";
+        if (msg.matches("hi|hello|hey|heythere|hiii|gm|gn")) return "Hello! How can I help you today? 😊";
 
-        // 3. TIME
-        if (msg.contains("time")) {
-            return "The current time is " + java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")) + ".";
-        }
-
-        // 4. FACTS & CITIES (ChatGPT Style)
-        if (msg.contains("hyderabad")) {
-            return "Hyderabad is a major city in India known for its history, IT industry, and world-famous Biryani. It's often called the 'City of Pearls'.";
-        }
-        if (msg.contains("delhi")) return "Delhi is the capital of India, a massive metropolitan area with a rich history spanning centuries.";
-        if (msg.contains("london")) return "London is the capital of the UK, famous for its iconic landmarks like Big Ben and the Tower of London.";
+        // 3. FACTS & CITIES
+        if (msg.contains("hyderabad")) return "Hyderabad is a major IT and heritage hub in India, famous for the Charminar, Golconda Fort, and its world-renowned Biryani.";
+        if (msg.contains("delhi")) return "Delhi is India's capital, a massive metropolitan area with historic sites like the Red Fort and Qutub Minar.";
+        if (msg.contains("london")) return "London is the capital of the UK, a global city famous for Big Ben, the London Eye, and the Thames.";
         
-        // 5. PROGRAMMING
-        if (msg.contains("python")) return "Python is a powerful language used for AI, web dev, and automation. Example: `print('Hello World')`";
-        if (msg.contains("java")) return "Java is a robust, object-oriented language widely used for enterprise and Android applications.";
+        // 4. CODING & TECH
+        if (msg.contains("python")) return "Python is a versatile language for AI and automation.\n```python\nprint(\"Hello from Python!\")\n```";
+        if (msg.contains("java")) return "Java is a robust enterprise language.\n```java\nSystem.out.println(\"Hello from Java\");\n```";
+        if (msg.contains("html")) return "HTML provides the structure for websites.\n```html\n<h1>Hello World</h1>\n```";
 
         if (msg.contains("joke")) return getRandomJoke();
-        if (msg.contains("whoareyou") || msg.contains("whoareu")) return "I'm your smart AI assistant, ready to help you with anything from math to general knowledge! 🚀";
+        if (msg.contains("whoareyou") || msg.contains("whoareu")) return "I'm your advanced AI assistant, here to help with math, coding, and any questions you have! 🚀";
 
-        // 6. FALLBACK
+        // 5. FALLBACK
         return smartFallback(userMessage);
     }
 
