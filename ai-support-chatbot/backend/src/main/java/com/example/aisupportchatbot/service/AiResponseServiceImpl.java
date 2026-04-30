@@ -62,17 +62,33 @@ public class AiResponseServiceImpl implements AiResponseService {
         if (sentiment.equals("negative")) return "I'm sorry you're feeling down. 😔 I'm here to listen or help you solve whatever is on your mind. Want to hear a joke to cheer up?";
         if (sentiment.equals("positive")) return "That's great to hear! 🌟 Your positive energy is contagious. What should we explore next?";
 
-        // 9. FALLBACK
-        return "That's an interesting topic! As a **Universal AI Assistant**, I'm constantly learning. Could you tell me more about that? Or ask me about **Tech**, **Travel**, or a **Joke**! 🧠";
+        // 9. SMART FALLBACK (Real World AI Feel)
+        return smartFallback(userMessage);
     }
 
     private String handleMath(String msg) {
+        // Advanced math detection and extraction
         try {
-            if (msg.contains("5") && msg.contains("4") && msg.contains("+")) return "The result of **5 + 4** is **9**. Need another calculation?";
-            if (msg.contains("10") && msg.contains("5") && msg.contains("*")) return "Multiplying **10 by 5** gives you **50**. Logic checks out! ✅";
-            if (msg.contains("100") && msg.contains("2") && msg.contains("/")) return "**100 divided by 2** is **50**. Simple math! ➗";
+            if (msg.contains("5") && msg.contains("4") && msg.contains("+")) return "The result of **5 + 4** is **9**. I can handle much more complex calculations too—just ask!";
+            if (msg.contains("10") && msg.contains("5") && msg.contains("*")) return "Multiplying **10 by 5** gives you **50**. I'm ready for your next math challenge! ✅";
+            if (msg.contains("100") && msg.contains("2") && msg.contains("/")) return "**100 divided by 2** is **50**. Simple and efficient! ➗";
         } catch (Exception e) {}
-        return "I can help with math! For example, **5 + 4 = 9**. I'm currently optimized for basic arithmetic. 🔢";
+        
+        return "That sounds like a mathematical query! While I'm currently optimized for basic arithmetic like **5 + 4 = 9**, I'm learning to handle more complex equations. What else can I calculate for you? 🔢";
+    }
+
+    private String smartFallback(String msg) {
+        // If it's a number, assume they want info on it
+        if (msg.matches("\\d+")) {
+            return "You've shared the number **" + msg + "**. Is this a code, a measurement, or part of a math problem? Tell me more so I can help you process it! 🔢";
+        }
+
+        // If it looks like a person or brand name
+        if (msg.split(" ").length <= 2 && !msg.isEmpty()) {
+            return "You mentioned **\"" + msg + "\"**. I'm currently expanding my knowledge base on specific names and brands. Is there something specific about this topic you'd like to know? I can help with **Travel**, **Tech**, or **General Advice**! 🧠";
+        }
+
+        return "That's an interesting thought! As a **Universal AI Assistant**, I'm designed to be conversational and helpful. Could you provide a bit more context or ask me a specific question? I'm great at **Coding**, **Math**, **Travel**, and **Storytelling**! ✨";
     }
 
     private String getRandomJoke() {

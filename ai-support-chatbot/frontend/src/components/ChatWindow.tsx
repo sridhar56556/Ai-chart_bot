@@ -113,8 +113,9 @@ const ChatWindow: React.FC = () => {
                 <div key={msg.id} className="message-wrapper">
                   {/* User Message */}
                   <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
                     className="user"
                   >
                     <div className="message-bubble">
@@ -124,12 +125,13 @@ const ChatWindow: React.FC = () => {
 
                   {/* Bot Response */}
                   <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
                     className="bot"
                   >
                     <div className="bot-content">
-                      <div className="avatar" style={{ width: '28px', height: '28px', fontSize: '0.8rem', background: '#2563eb', borderRadius: '50%' }}>AI</div>
+                      <div className="avatar" style={{ width: '32px', height: '32px', fontSize: '0.85rem', background: 'linear-gradient(135deg, #2563eb, #7c3aed)', borderRadius: '10px', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)' }}>AI</div>
                       <div className="bot-response-text">
                         <div className="message-bubble">
                           {formatText(msg.botResponse)}
