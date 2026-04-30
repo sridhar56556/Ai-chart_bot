@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { sendMessage, getChatHistory } from '../services/api';
-import { Send, Bot, Sparkles } from 'lucide-react';
+import { Send, Bot, Sparkles, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Sidebar from './Sidebar';
 
@@ -44,6 +44,21 @@ const ChatWindow: React.FC = () => {
     setInput('');
   };
 
+  const formatText = (text: string) => {
+    // Basic formatting for **bold** and newlines
+    return text.split('\n').map((line, i) => (
+      <span key={i}>
+        {line.split(/(\*\*.*?\*\*)/).map((part, j) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return <strong key={j}>{part.slice(2, -2)}</strong>;
+          }
+          return part;
+        })}
+        <br />
+      </span>
+    ));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
@@ -54,17 +69,16 @@ const ChatWindow: React.FC = () => {
 
     try {
       const response = await sendMessage(userMsg);
-      // Simulate natural AI thinking time
       setTimeout(() => {
         setMessages(prev => [...prev, response]);
         setIsLoading(false);
-      }, 600);
+      }, 400);
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMsg: Message = {
         id: Date.now(),
         userMessage: userMsg,
-        botResponse: "⚠️ The AI Assistant is still initializing or the server is busy. Please wait 1-2 minutes and try again.",
+        botResponse: "**Error:** The AI Assistant is temporarily unavailable. Please try again in a moment.",
         sentiment: "neutral",
         timestamp: new Date().toISOString()
       };
@@ -81,31 +95,27 @@ const ChatWindow: React.FC = () => {
         <div className="chat-container">
           <header className="chat-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ padding: '8px', borderRadius: '8px', background: 'var(--primary)' }}>
-                <Sparkles size={20} color="white" />
-              </div>
-              <h1 style={{ fontSize: '1.2rem' }}>Universal AI Assistant</h1>
+              <h1 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Universal AI Assistant</h1>
             </div>
-            <Bot size={20} color="var(--primary)" />
+            <Bot size={20} color="var(--text-muted)" />
           </header>
 
           <div className="chat-messages">
             {messages.length === 0 && !isLoading && (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.3 }}>
-                <Bot size={64} style={{ marginBottom: '20px' }} />
-                <h2 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>How can I help you today?</h2>
-                <p>Ask about Math, Coding, Stories, or Hyderabad.</p>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.2 }}>
+                <Bot size={48} style={{ marginBottom: '16px' }} />
+                <h2 style={{ fontSize: '1.2rem' }}>How can I help you today?</h2>
               </div>
             )}
             
             <AnimatePresence>
               {messages.map((msg) => (
-                <React.Fragment key={msg.id}>
+                <div key={msg.id} className="message-wrapper">
                   {/* User Message */}
                   <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="message-wrapper user"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="user"
                   >
                     <div className="message-bubble">
                       {msg.userMessage}
@@ -114,52 +124,37 @@ const ChatWindow: React.FC = () => {
 
                   {/* Bot Response */}
                   <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="message-wrapper bot"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="bot"
                   >
-                    <div style={{ display: 'flex', gap: '16px' }}>
-                      <div className="avatar" style={{ width: '28px', height: '28px', fontSize: '0.8rem' }}>AI</div>
-                      <div className="message-bubble" style={{ padding: '0', background: 'transparent', border: 'none' }}>
-                        {msg.botResponse}
-                        <div style={{ marginTop: '8px' }}>
-                          <span className={`sentiment-badge sentiment-${msg.sentiment.toLowerCase()}`}>
-                            {msg.sentiment}
-                          </span>
+                    <div className="bot-content">
+                      <div className="avatar" style={{ width: '28px', height: '28px', fontSize: '0.8rem', background: '#2563eb', borderRadius: '50%' }}>AI</div>
+                      <div className="bot-response-text">
+                        <div className="message-bubble">
+                          {formatText(msg.botResponse)}
                         </div>
+                        <span className="sentiment-badge">
+                          {msg.sentiment.toLowerCase()}
+                        </span>
                       </div>
                     </div>
                   </motion.div>
-                </React.Fragment>
+                </div>
               ))}
             </AnimatePresence>
             
             {isLoading && (
-              <div className="message-wrapper bot">
-                <div style={{ display: 'flex', gap: '16px' }}>
-                  <div className="avatar" style={{ width: '28px', height: '28px', fontSize: '0.8rem' }}>AI</div>
-                  <div className="loading-dots">
-                    <div className="dot"></div>
-                    <div className="dot"></div>
-                    <div className="dot"></div>
+              <div className="message-wrapper">
+                <div className="bot-content">
+                  <div className="avatar" style={{ width: '28px', height: '28px', fontSize: '0.8rem', background: '#2563eb', borderRadius: '50%' }}>AI</div>
+                  <div className="bot-response-text">
+                    <div style={{ opacity: 0.5 }}>Thinking...</div>
                   </div>
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
-          </div>
-
-          <div className="quick-actions" style={{ padding: '0 24px', marginBottom: '10px', display: 'flex', gap: '8px', overflowX: 'auto', justifyContent: 'center' }}>
-            {['Tell a Story', 'Solve Math', 'Write Code', 'About Hyderabad'].map(action => (
-              <button 
-                key={action}
-                onClick={() => { setInput(action); }}
-                className="glass"
-                style={{ padding: '8px 16px', borderRadius: '12px', fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap', border: '1px solid var(--border)', color: 'var(--text-muted)', background: 'transparent' }}
-              >
-                {action}
-              </button>
-            ))}
           </div>
 
           <form className="chat-input-container" onSubmit={handleSubmit}>
