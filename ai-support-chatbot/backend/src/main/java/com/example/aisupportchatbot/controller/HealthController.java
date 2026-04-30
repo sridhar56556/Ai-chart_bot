@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class HealthController {
 
-    @GetMapping("/")
+    @GetMapping("/api/health")
     public String healthCheck() {
         return "AI Support Chatbot Backend is Running!";
     }
