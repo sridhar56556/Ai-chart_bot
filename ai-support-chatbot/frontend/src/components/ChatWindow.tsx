@@ -95,7 +95,7 @@ const ChatWindow: React.FC = () => {
         <div className="chat-container">
           <header className="chat-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <h1 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Universal AI Assistant</h1>
+              <h1 style={{ fontSize: '1.2rem', fontWeight: 600 }}>AI Chat Assistant</h1>
             </div>
             <Bot size={20} color="var(--text-muted)" />
           </header>
@@ -168,7 +168,7 @@ const ChatWindow: React.FC = () => {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Message Universal AI Assistant..."
+                placeholder="Message AI Chat Assistant..."
                 disabled={isLoading}
               />
               <button type="submit" disabled={!input.trim() || isLoading}>
