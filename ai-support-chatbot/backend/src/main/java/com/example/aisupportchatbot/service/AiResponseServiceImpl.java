@@ -1,19 +1,34 @@
 package com.example.aisupportchatbot.service;
-// Finalizing premium UI and smart AI logic
-// Triggering redeploy
 
 import com.example.aisupportchatbot.model.ChatMessage;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Random;
+import java.util.Map;
+import java.util.HashMap;
 
 @Service
 public class AiResponseServiceImpl implements AiResponseService {
 
+    @Value("${GEMINI_API_KEY:}")
+    private String geminiApiKey;
+
     private final Random random = new Random();
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Override
     public String generateResponse(String userMessage, String sentiment, List<ChatMessage> context) {
+        // Try Gemini AI first if API Key is present
+        if (geminiApiKey != null && !geminiApiKey.isEmpty()) {
+            try {
+                return callGemini(userMessage);
+            } catch (Exception e) {
+                System.err.println("Gemini API failed, falling back to local logic: " + e.getMessage());
+            }
+        }
+
         String msg = userMessage.toLowerCase().trim();
 
         // 1. CONTEXTUAL CONTINUITY
@@ -90,6 +105,28 @@ public class AiResponseServiceImpl implements AiResponseService {
         }
 
         return "That's an interesting thought! As a **Universal AI Assistant**, I'm designed to be conversational and helpful. Could you provide a bit more context or ask me a specific question? I'm great at **Coding**, **Math**, **Travel**, and **Storytelling**! ✨";
+    }
+
+    private String callGemini(String prompt) {
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
+        
+        Map<String, Object> body = new HashMap<>();
+        Map<String, Object> content = new HashMap<>();
+        Map<String, Object> part = new HashMap<>();
+        part.put("text", prompt);
+        content.put("parts", new Object[]{part});
+        body.put("contents", new Object[]{content});
+
+        try {
+            Map<String, Object> response = restTemplate.postForObject(url, body, Map.class);
+            List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.get("candidates");
+            Map<String, Object> firstCandidate = candidates.get(0);
+            Map<String, Object> contentRes = (Map<String, Object>) firstCandidate.get("content");
+            List<Map<String, Object>> partsRes = (List<Map<String, Object>>) contentRes.get("parts");
+            return (String) partsRes.get(0).get("text");
+        } catch (Exception e) {
+            throw new RuntimeException("Gemini API call failed", e);
+        }
     }
 
     private String getRandomJoke() {
