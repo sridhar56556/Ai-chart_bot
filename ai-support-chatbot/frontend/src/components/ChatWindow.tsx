@@ -148,10 +148,12 @@ const ChatWindow: React.FC = () => {
             
             {isLoading && (
               <div className="message-wrapper">
-                <div className="bot-content">
-                  <div className="avatar" style={{ width: '28px', height: '28px', fontSize: '0.8rem', background: '#2563eb', borderRadius: '50%' }}>AI</div>
-                  <div className="bot-response-text">
-                    <div style={{ opacity: 0.5 }}>Thinking...</div>
+                <div className="bot">
+                  <div className="bot-content">
+                    <div className="avatar" style={{ width: '32px', height: '32px', fontSize: '0.85rem', background: 'linear-gradient(135deg, #2563eb, #7c3aed)', borderRadius: '10px' }}>AI</div>
+                    <div className="bot-response-text">
+                      <div style={{ opacity: 0.5 }}>Thinking...</div>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -177,14 +177,26 @@ body {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+}
+
+.user {
+  align-self: flex-end;
+  max-width: 80%;
+}
+
+.bot {
+  align-self: flex-start;
+  max-width: 90%;
 }
 
 .user .message-bubble {
-  color: var(--text);
+  background: hsla(230, 85%, 60%, 0.15);
+  padding: 12px 18px;
+  border-radius: 18px 18px 2px 18px;
+  border: 1px solid hsla(230, 85%, 60%, 0.3);
+  color: #fff;
   font-weight: 500;
-  font-size: 1.1rem;
-  padding-left: 40px; /* Align with bot text */
 }
 
 .bot-content {
@@ -206,9 +218,8 @@ body {
 }
 
 .message-bubble {
-  font-size: 1rem;
-  line-height: 1.7;
-  color: hsl(210, 40%, 90%);
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
 .sentiment-badge {
