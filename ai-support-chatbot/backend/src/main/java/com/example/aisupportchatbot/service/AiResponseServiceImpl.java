@@ -27,8 +27,6 @@ public class AiResponseServiceImpl implements AiResponseService {
 
     @Override
     public String generateResponse(String userMessage, String sentiment, List<ChatMessage> context) {
-        System.out.println("Generating response for: " + userMessage + " (Version: Premium-Math-v2)");
-        
         // Try Gemini AI first if API Key is present
         if (geminiApiKey != null && !geminiApiKey.isEmpty()) {
             try {
@@ -40,29 +38,20 @@ public class AiResponseServiceImpl implements AiResponseService {
 
         String msg = userMessage.toLowerCase().trim().replaceAll("\\s+", "");
 
-        // 1. MATH FIRST (Direct Evaluation)
+        // 1. MATH FIRST (Direct Answer)
         if (msg.matches(".*\\d+[\\+\\-\\*\\/]\\d+.*")) {
             return handleMath(msg);
         }
 
-        // 3. TRAVEL & GEOGRAPHY
-        if (msg.contains("hyderabad")) return "Hyderabad is a major city in India known for its rich history, the iconic **Charminar**, and world-famous **Biryani**. It's also a leading tech hub! 🏰";
-        if (msg.contains("tokyo") || msg.contains("japan")) return "Tokyo is a dazzling metropolis where traditional temples meet neon-lit skyscrapers. Highlights include **Shibuya Crossing** and incredible sushi. 🍣";
-        if (msg.contains("paris") || msg.contains("france")) return "Paris, the 'City of Light', is renowned for its art, fashion, and history. The **Eiffel Tower** and **Louvre** are its most famous landmarks. 🥐";
+        // 2. GREETINGS
+        if (msg.matches("hi|hello|hey|heythere|hiii|gm|gn")) return "Hello! How can I help you today?";
 
-        // 4. TECH & CODING
-        if (msg.contains("python")) return "**Python** is a high-level language loved for its simplicity. Perfect for AI and data science. \n```python\nprint(\"Hello World\")\n```";
-        if (msg.contains("java")) return "**Java** is a robust, enterprise-grade language. It powers everything from Android apps to massive server systems. ☕";
-
-        // 5. GENERAL & PHILOSOPHY
+        // 3. FACTS
+        if (msg.contains("hyderabad")) return getHyderabadDetails();
         if (msg.contains("joke")) return getRandomJoke();
-        if (msg.contains("who are you") || msg.contains("your name")) return "I am your **Universal AI Assistant**. I'm here to help you with anything from coding and math to general knowledge! 🚀";
-        if (msg.contains("meaning of life")) return "The ultimate answer is **42**, but the journey to find it is what truly matters! 🌌";
+        if (msg.contains("whoareyou")) return "I'm your AI assistant, ready to help with any question.";
 
-        // 6. GREETINGS
-        if (msg.matches("hi|hello|hey|hey there|hiii|gm|gn")) return "Hello! 👋 I'm your Universal AI Assistant. How can I help you today?";
-
-        // 7. FALLBACK
+        // 4. FALLBACK
         return smartFallback(userMessage);
     }
 
