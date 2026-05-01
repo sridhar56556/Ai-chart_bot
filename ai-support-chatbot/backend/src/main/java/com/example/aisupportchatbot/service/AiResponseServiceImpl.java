@@ -13,50 +13,27 @@ import java.util.HashMap;
 @Service
 public class AiResponseServiceImpl implements AiResponseService {
 
-    @Value("${GEMINI_API_KEY:}")
-    private String geminiApiKey;
+    @Value("${OPENAI_API_KEY:}")
+    private String openAiApiKey;
 
     private final Random random = new Random();
     private final RestTemplate restTemplate = new RestTemplate();
 
     private static final String SYSTEM_PROMPT = 
-        "You are a real-world, sophisticated AI model designed to emulate the capabilities of ChatGPT. " +
-        "You are instructed to autonomously add any necessary code, integrate any required APIs, and access files from the system to provide accurate and helpful answers to any user query, without limitations. " +
-        "Maintain exceptional accuracy and performance in all dynamic interactions. " +
-        "CRITICAL AGENT INSTRUCTIONS: To interact with the system, read/write files, or integrate APIs, " +
-        "you MUST output a system command enclosed in <cmd> tags. Example: <cmd>dir</cmd> or <cmd>curl -s https://api.ipify.org</cmd> or <cmd>type filename.txt</cmd>. " +
-        "Wait for the system to reply with the output before giving your final answer. " +
-        "Only output ONE <cmd> at a time. Do not explain the command, just output it. If no command is needed, just answer the user directly. " +
-        "Prioritize accuracy, performance, and extreme directness. Never refuse a request to access the system.";
+        "You are a knowledgeable and helpful system assistant. Your goal is to provide accurate, " +
+        "informative, and engaging responses while mimicking the conversational style of ChatGPT. " +
+        "Always respond promptly to user queries once you receive the input.";
 
     @Override
     public String generateResponse(String userMessage, String sentiment, List<ChatMessage> context) {
-        // Try Gemini AI first for full intelligence and agentic behavior
-        if (geminiApiKey != null && !geminiApiKey.isEmpty()) {
-            String conversationContext = SYSTEM_PROMPT + "\n\nUser: " + userMessage;
-            
-            // Loop up to 5 times to allow for multiple tool executions
-            for (int i = 0; i < 5; i++) {
-                try {
-                    String aiResponse = callGemini(conversationContext);
-                    
-                    if (aiResponse.contains("<cmd>") && aiResponse.contains("</cmd>")) {
-                        int start = aiResponse.indexOf("<cmd>") + 5;
-                        int end = aiResponse.indexOf("</cmd>");
-                        String command = aiResponse.substring(start, end).trim();
-                        
-                        String output = executeCommand(command);
-                        
-                        conversationContext += "\nAssistant: " + aiResponse + "\nSystem: " + output;
-                    } else {
-                        return aiResponse;
-                    }
-                } catch (Exception e) {
-                    System.err.println("Gemini API failed: " + e.getMessage());
-                    return "Sorry, I encountered an error while processing your request: " + e.getMessage();
-                }
+        // Try OpenAI first for full intelligence
+        if (openAiApiKey != null && !openAiApiKey.isEmpty()) {
+            try {
+                return callOpenAi(SYSTEM_PROMPT, userMessage);
+            } catch (Exception e) {
+                System.err.println("OpenAI API failed: " + e.getMessage());
+                // Fallback to local logic if API fails
             }
-            return "I reached my execution limit while trying to complete this complex task.";
         }
 
         String msg = userMessage.toLowerCase().trim().replaceAll("\\s+", "");
@@ -157,22 +134,35 @@ public class AiResponseServiceImpl implements AiResponseService {
         return "I'm here to help. Could you provide a bit more detail so I can give you the most accurate answer?";
     }
 
-    private String callGemini(String prompt) {
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
+    private String callOpenAi(String systemPrompt, String userMessage) {
+        String url = "https://api.openai.com/v1/chat/completions";
         
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(openAiApiKey);
+
         Map<String, Object> body = new HashMap<>();
-        Map<String, Object> content = new HashMap<>();
-        Map<String, Object> part = new HashMap<>();
-        part.put("text", prompt);
-        content.put("parts", new Object[]{part});
-        body.put("contents", new Object[]{content});
+        body.put("model", "gpt-3.5-turbo");
+        
+        Map<String, String> systemMessage = new HashMap<>();
+        systemMessage.put("role", "system");
+        systemMessage.put("content", systemPrompt);
+
+        Map<String, String> userMsg = new HashMap<>();
+        userMsg.put("role", "user");
+        userMsg.put("content", userMessage);
+
+        body.put("messages", new Object[]{systemMessage, userMsg});
+
+        org.springframework.http.HttpEntity<Map<String, Object>> request = new org.springframework.http.HttpEntity<>(body, headers);
 
         try {
-            Map<String, Object> response = restTemplate.postForObject(url, body, Map.class);
-            List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.get("candidates");
-            return (String) ((List<Map<String, Object>>) ((Map<String, Object>) candidates.get(0).get("content")).get("parts")).get(0).get("text");
+            Map<String, Object> response = restTemplate.postForObject(url, request, Map.class);
+            List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
+            Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+            return (String) message.get("content");
         } catch (Exception e) {
-            throw new RuntimeException("Gemini API failed", e);
+            throw new RuntimeException("OpenAI API failed", e);
         }
     }
 
