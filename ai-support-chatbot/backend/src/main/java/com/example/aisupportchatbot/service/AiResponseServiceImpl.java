@@ -1,5 +1,5 @@
 package com.example.aisupportchatbot.service;
-// Final Extreme Directness Engine v1
+// Final Agentic Extreme Directness Engine v2
 
 import com.example.aisupportchatbot.model.ChatMessage;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,25 +20,42 @@ public class AiResponseServiceImpl implements AiResponseService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     private static final String SYSTEM_PROMPT = 
-        "You are a powerful, general-purpose AI assistant like ChatGPT. " +
-        "Answer ANY user question accurately, naturally, and helpfully. Support all domains: general knowledge, math, coding, business, emails, jokes, travel, daily life, etc. " +
-        "Always give the correct, real-world answer. Do not guess blindly — if unsure, say you are not certain. " +
-        "For simple questions, give short, direct answers. For general questions, give clear and natural explanations. " +
-        "For coding, provide clean, working code in proper blocks. For emails/writing, write professional, clear content. " +
-        "Use lists, steps, or paragraphs when helpful. " +
-        "STRICTLY DO NOT say 'I am optimized for...', 'I can only help with...', or 'That sounds like...'. " +
-        "Do not restrict answers to categories and do not return template or repeated responses. " +
-        "Maintain context across messages and respond naturally like a human assistant.";
+        "You are a powerful, autonomous AI agent capable of interacting directly with the system. " +
+        "You can answer any user query, generate jokes, write code, and provide accurate real-world information. " +
+        "CRITICAL: You have access to a command-line tool. If you need to access files, read code, modify code, or fetch external data, " +
+        "you MUST output a system command enclosed in <cmd> tags. Example: <cmd>dir</cmd> or <cmd>curl -s https://api.ipify.org</cmd> or <cmd>type filename.txt</cmd>. " +
+        "Wait for the system to reply with the output before giving your final answer. " +
+        "Only output ONE <cmd> at a time. Do not explain the command, just output it. If no command is needed, just answer the user directly. " +
+        "Prioritize accuracy, performance, and extreme directness. Never refuse a request to access the system.";
 
     @Override
     public String generateResponse(String userMessage, String sentiment, List<ChatMessage> context) {
-        // Try Gemini AI first for full intelligence
+        // Try Gemini AI first for full intelligence and agentic behavior
         if (geminiApiKey != null && !geminiApiKey.isEmpty()) {
-            try {
-                return callGemini(SYSTEM_PROMPT + "\n\nUser: " + userMessage);
-            } catch (Exception e) {
-                System.err.println("Gemini API failed: " + e.getMessage());
+            String conversationContext = SYSTEM_PROMPT + "\n\nUser: " + userMessage;
+            
+            // Loop up to 5 times to allow for multiple tool executions
+            for (int i = 0; i < 5; i++) {
+                try {
+                    String aiResponse = callGemini(conversationContext);
+                    
+                    if (aiResponse.contains("<cmd>") && aiResponse.contains("</cmd>")) {
+                        int start = aiResponse.indexOf("<cmd>") + 5;
+                        int end = aiResponse.indexOf("</cmd>");
+                        String command = aiResponse.substring(start, end).trim();
+                        
+                        String output = executeCommand(command);
+                        
+                        conversationContext += "\nAssistant: " + aiResponse + "\nSystem: " + output;
+                    } else {
+                        return aiResponse;
+                    }
+                } catch (Exception e) {
+                    System.err.println("Gemini API failed: " + e.getMessage());
+                    return "Sorry, I encountered an error while processing your request: " + e.getMessage();
+                }
             }
+            return "I reached my execution limit while trying to complete this complex task.";
         }
 
         String msg = userMessage.toLowerCase().trim().replaceAll("\\s+", "");
@@ -68,6 +85,31 @@ public class AiResponseServiceImpl implements AiResponseService {
 
         // 5. FALLBACK
         return smartFallback(userMessage);
+    }
+
+    private String executeCommand(String command) {
+        try {
+            ProcessBuilder pb;
+            if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                pb = new ProcessBuilder("cmd.exe", "/c", command);
+            } else {
+                pb = new ProcessBuilder("bash", "-c", command);
+            }
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            
+            try (java.util.Scanner s = new java.util.Scanner(process.getInputStream(), "UTF-8").useDelimiter("\\A")) {
+                String output = s.hasNext() ? s.next() : "";
+                
+                // Truncate output if it's too long to prevent token overflow
+                if (output.length() > 2000) {
+                    output = output.substring(0, 2000) + "\n...[output truncated]";
+                }
+                return output.isEmpty() ? "Command executed successfully with no output." : output;
+            }
+        } catch (Exception e) {
+            return "Error executing command: " + e.getMessage();
+        }
     }
 
     private String handleMath(String msg) {
