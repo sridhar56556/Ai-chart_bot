@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/chat")
+@RequestMapping("/api")
 @CrossOrigin(origins = {"http://localhost:5173", "${FRONTEND_URL:*}"})
 public class ChatController {
 
@@ -24,7 +24,7 @@ public class ChatController {
     @Autowired
     private AiResponseService aiResponseService;
 
-    @PostMapping
+    @PostMapping("/chat")
     public ResponseEntity<ChatMessage> chat(@RequestBody ChatRequest request) {
         String userMessage = request.getMessage();
         String sentiment = "neutral";
@@ -54,12 +54,12 @@ public class ChatController {
         return ResponseEntity.ok(savedMessage);
     }
 
-    @GetMapping("/history")
+    @GetMapping("/chat/history")
     public ResponseEntity<List<ChatMessage>> getHistory() {
         List<ChatMessage> messages = chatMessageRepository.findAllByOrderByTimestampDesc();
         return ResponseEntity.ok(messages);
     }
-    @DeleteMapping("/clear")
+    @DeleteMapping("/chat/clear")
     public ResponseEntity<Void> clearHistory() {
         chatMessageRepository.deleteAll();
         return ResponseEntity.ok().build();
