@@ -58,6 +58,11 @@ public class AiResponseServiceImpl implements AiResponseService {
     }
 
     private String callOpenAI(String userMessage, List<ChatMessage> context) {
+        // Critical Check: Ensure the key isn't the literal string "${OPENROUTER_API_KEY}"
+        if (apiKey == null || apiKey.isEmpty() || apiKey.contains("{")) {
+            throw new RuntimeException("ERROR: OPENROUTER_API_KEY is not set or invalid in environment variables. Check Render dashboard.");
+        }
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer " + apiKey);
@@ -104,16 +109,21 @@ public class AiResponseServiceImpl implements AiResponseService {
         requestBody.put("messages", messages);
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-        ResponseEntity<Map> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, Map.class);
+        
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, Map.class);
 
-        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
-            if (choices != null && !choices.isEmpty()) {
-                Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
-                if (message != null) {
-                    return (String) message.get("content");
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
+                if (choices != null && !choices.isEmpty()) {
+                    Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+                    if (message != null) {
+                        return (String) message.get("content");
+                    }
                 }
             }
+        } catch (Exception e) {
+            throw new RuntimeException("OpenRouter API Call Failed: " + e.getMessage());
         }
         
         throw new RuntimeException("Invalid response from API");
