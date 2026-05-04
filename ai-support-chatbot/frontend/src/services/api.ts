@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://localhost:8080/api';
 
 export const sendMessage = async (message: string) => {
   const response = await axios.post(`${API_BASE_URL}/chat`, { message });

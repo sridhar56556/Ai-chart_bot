@@ -1,11 +1,16 @@
 package com.example.aisupportchatbot.service;
-// Final Agentic Extreme Directness Engine v2
 
 import com.example.aisupportchatbot.model.ChatMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.Map;
 import java.util.HashMap;
@@ -13,29 +18,108 @@ import java.util.HashMap;
 @Service
 public class AiResponseServiceImpl implements AiResponseService {
 
-    @Value("${OPENAI_API_KEY:}")
-    private String openAiApiKey;
+    @Value("${openai.api.key}")
+    private String apiKey;
+
+    @Value("${openai.api.url}")
+    private String apiUrl;
 
     private final Random random = new Random();
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private static final String SYSTEM_PROMPT = 
-        "You are a knowledgeable and helpful system assistant. Your goal is to provide accurate, " +
-        "informative, and engaging responses while mimicking the conversational style of ChatGPT. " +
-        "Always respond promptly to user queries once you receive the input.";
+    private static final String SYSTEM_PROMPT = """
+        You are a highly capable AI assistant designed to provide accurate, clear, and helpful responses across a wide range of topics.
+
+        Rules:
+        - Always give correct, well-structured answers
+        - Be concise but complete
+        - If the question is unclear, ask for clarification
+        - Do not hallucinate facts; say "I don’t know" if unsure
+        - Provide step-by-step explanations when solving problems
+        - Adapt tone based on user input (technical, casual, formal)
+        - For coding questions: give working, clean, production-level code
+        - For math: show steps clearly
+        - For general questions: explain in simple terms first, then add detail
+
+        Behavior:
+        - Never mention being an AI unless explicitly asked
+        - Do not include unnecessary disclaimers
+        - Focus on solving the user's problem directly
+        """;
 
     @Override
     public String generateResponse(String userMessage, String sentiment, List<ChatMessage> context) {
-        // Try OpenAI first for full intelligence
-        if (openAiApiKey != null && !openAiApiKey.isEmpty()) {
-            try {
-                return callOpenAi(SYSTEM_PROMPT, userMessage);
-            } catch (Exception e) {
-                System.err.println("OpenAI API failed: " + e.getMessage());
-                // Fallback to local logic if API fails
+        try {
+            return callOpenAI(userMessage, context);
+        } catch (Exception e) {
+            System.err.println("Error calling OpenAI/OpenRouter API: " + e.getMessage());
+            return fallbackGenerateResponse(userMessage);
+        }
+    }
+
+    private String callOpenAI(String userMessage, List<ChatMessage> context) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + apiKey);
+        // OpenRouter optional headers
+        headers.set("HTTP-Referer", "http://localhost:8080");
+        headers.set("X-Title", "AI Support Chatbot");
+
+        Map<String, Object> requestBody = new HashMap<>();
+        // Using standard OpenAI model as requested now that we have a new key
+        requestBody.put("model", "openai/gpt-3.5-turbo"); 
+
+        List<Map<String, String>> messages = new ArrayList<>();
+        
+        // Add System Prompt
+        Map<String, String> systemMsg = new HashMap<>();
+        systemMsg.put("role", "system");
+        systemMsg.put("content", SYSTEM_PROMPT);
+        messages.add(systemMsg);
+
+        // Add Context
+        if (context != null) {
+            for (ChatMessage msg : context) {
+                if (msg.getUserMessage() != null && !msg.getUserMessage().isEmpty()) {
+                    Map<String, String> userMsg = new HashMap<>();
+                    userMsg.put("role", "user");
+                    userMsg.put("content", msg.getUserMessage());
+                    messages.add(userMsg);
+                }
+                if (msg.getBotResponse() != null && !msg.getBotResponse().isEmpty()) {
+                    Map<String, String> botMsg = new HashMap<>();
+                    botMsg.put("role", "assistant");
+                    botMsg.put("content", msg.getBotResponse());
+                    messages.add(botMsg);
+                }
             }
         }
 
+        // Add Current User Message
+        Map<String, String> currentMsg = new HashMap<>();
+        currentMsg.put("role", "user");
+        currentMsg.put("content", userMessage);
+        messages.add(currentMsg);
+
+        requestBody.put("messages", messages);
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<Map> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, Map.class);
+
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
+            if (choices != null && !choices.isEmpty()) {
+                Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+                if (message != null) {
+                    return (String) message.get("content");
+                }
+            }
+        }
+        
+        throw new RuntimeException("Invalid response from API");
+    }
+
+    private String fallbackGenerateResponse(String userMessage) {
         String msg = userMessage.toLowerCase().trim().replaceAll("\\s+", "");
 
         // 1. MATH (Direct Result)
@@ -63,31 +147,6 @@ public class AiResponseServiceImpl implements AiResponseService {
 
         // 5. FALLBACK
         return smartFallback(userMessage);
-    }
-
-    private String executeCommand(String command) {
-        try {
-            ProcessBuilder pb;
-            if (System.getProperty("os.name").toLowerCase().contains("win")) {
-                pb = new ProcessBuilder("cmd.exe", "/c", command);
-            } else {
-                pb = new ProcessBuilder("bash", "-c", command);
-            }
-            pb.redirectErrorStream(true);
-            Process process = pb.start();
-            
-            try (java.util.Scanner s = new java.util.Scanner(process.getInputStream(), "UTF-8").useDelimiter("\\A")) {
-                String output = s.hasNext() ? s.next() : "";
-                
-                // Truncate output if it's too long to prevent token overflow
-                if (output.length() > 2000) {
-                    output = output.substring(0, 2000) + "\n...[output truncated]";
-                }
-                return output.isEmpty() ? "Command executed successfully with no output." : output;
-            }
-        } catch (Exception e) {
-            return "Error executing command: " + e.getMessage();
-        }
     }
 
     private String handleMath(String msg) {
@@ -134,38 +193,6 @@ public class AiResponseServiceImpl implements AiResponseService {
         return "I'm here to help. Could you provide a bit more detail so I can give you the most accurate answer?";
     }
 
-    private String callOpenAi(String systemPrompt, String userMessage) {
-        String url = "https://api.openai.com/v1/chat/completions";
-        
-        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(openAiApiKey);
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("model", "gpt-3.5-turbo");
-        
-        Map<String, String> systemMessage = new HashMap<>();
-        systemMessage.put("role", "system");
-        systemMessage.put("content", systemPrompt);
-
-        Map<String, String> userMsg = new HashMap<>();
-        userMsg.put("role", "user");
-        userMsg.put("content", userMessage);
-
-        body.put("messages", new Object[]{systemMessage, userMsg});
-
-        org.springframework.http.HttpEntity<Map<String, Object>> request = new org.springframework.http.HttpEntity<>(body, headers);
-
-        try {
-            Map<String, Object> response = restTemplate.postForObject(url, request, Map.class);
-            List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
-            Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
-            return (String) message.get("content");
-        } catch (Exception e) {
-            throw new RuntimeException("OpenAI API failed", e);
-        }
-    }
-
     private String getRandomJoke() {
         String[] jokes = {
             "Why don’t programmers like nature? Because it has too many bugs! 😄",
@@ -174,8 +201,5 @@ public class AiResponseServiceImpl implements AiResponseService {
         };
         return jokes[random.nextInt(jokes.length)];
     }
-
-    private String getHyderabadDetails() {
-        return "Hyderabad is famous for its rich history, the Charminar, and world-class Biryani.";
-    }
 }
+

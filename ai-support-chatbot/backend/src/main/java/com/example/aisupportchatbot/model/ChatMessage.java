@@ -24,7 +24,7 @@ public class ChatMessage {
     @Column(nullable = false, length = 20)
     private String sentiment;
 
-    @Column(nullable = false)
+    @Column(name = "message_timestamp", nullable = false)
     private LocalDateTime timestamp;
 
     public ChatMessage(String userMessage, String botResponse, String sentiment) {

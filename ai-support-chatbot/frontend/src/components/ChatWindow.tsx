@@ -33,9 +33,15 @@ const ChatWindow: React.FC = () => {
   const loadMessages = async () => {
     try {
       const history = await getChatHistory();
-      setMessages(history);
+      if (Array.isArray(history)) {
+        setMessages(history);
+      } else {
+        console.error('History is not an array:', history);
+        setMessages([]);
+      }
     } catch (error) {
       console.error('Error loading chat history:', error);
+      setMessages([]);
     }
   };
 
@@ -80,13 +86,14 @@ const ChatWindow: React.FC = () => {
         setMessages(prev => [...prev, response]);
         setIsLoading(false);
       }, 400);
-    } catch (error) {
-      console.error('Error sending message:', error);
+    } catch (error: any) {
+      console.error('FULL ERROR:', error);
+      const errorMessage = error?.response?.data?.message || error?.message || String(error);
       const errorMsg: Message = {
         id: Date.now(),
         userMessage: userMsg,
-        botResponse: "**Error:** The AI Assistant is temporarily unavailable. Please try again in a moment.",
-        sentiment: "neutral",
+        botResponse: `**Error:** ${errorMessage}`,
+        sentiment: "negative",
         timestamp: new Date().toISOString()
       };
       setMessages(prev => [...prev, errorMsg]);
